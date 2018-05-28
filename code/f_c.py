@@ -23,7 +23,7 @@ batch_size = 100
 original_dim = 784
 latent_dim = 2
 intermediate_dim = 256
-epochs = 50
+epochs = 1
 epsilon_std = 1.0
 
 k_constants = [0 for i in range(latent_dim)]
@@ -82,16 +82,14 @@ test_digits_mean = {}
 test_digits_var = {}
 test_digits_z = {}
 
-encoder = Model([x, z_log_var], [z_mean, z], name='encoder')
+encoder = Model([x, z_log_var], z, name='encoder')
 
 
 predictions = encoder.predict(x_test)
 
 for i in range(len(y_test)):
     if not test_digits_mean.has_key(str(y_test[i])):
-        test_digits_mean[str(y_test[i])] = predictions[0][i]
-        # test_digits_var[str(y_test[i])] = predictions[1][i]
-        test_digits_z[str(y_test[i])] = predictions[1][i]
+        test_digits_z[str(y_test[i])] = predictions[i]
     if len(test_digits_mean.keys()) == 10:
         break
 

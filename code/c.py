@@ -23,7 +23,7 @@ batch_size = 1000
 original_dim = 784
 latent_dim = 2
 intermediate_dim = 256
-epochs = 50
+epochs = 5
 epsilon_std = 1.0
 
 
@@ -78,14 +78,14 @@ print("#####")
 
 test_digits_z = {}
 
-encoder = Model(x, [z], name='encoder')
+encoder = Model(x, z, name='encoder')
 
 
 predictions = encoder.predict(x_test)
 
 for i in range(len(y_test)):
     if not test_digits_z.has_key(str(y_test[i])):
-        test_digits_z[str(y_test[i])] = predictions[2][i]
+        test_digits_z[str(y_test[i])] = predictions[i]
     if len(test_digits_z.keys()) == 10:
         break
 
