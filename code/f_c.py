@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 import sys
+import seaborn as sns
 from keras.layers import Input, Dense, Lambda
 from keras.models import Model
 from keras import backend as K
@@ -23,7 +24,7 @@ batch_size = 100
 original_dim = 784
 latent_dim = 2
 intermediate_dim = 256
-epochs = 1
+epochs = 50
 epsilon_std = 1.0
 
 k_constants = [0 for i in range(latent_dim)]
@@ -87,38 +88,40 @@ encoder = Model([x, z_log_var], z, name='encoder')
 
 predictions = encoder.predict(x_test)
 
+xs = []
+ys = []
+ls = []
 for i in range(len(y_test)):
-    if not test_digits_mean.has_key(str(y_test[i])):
+    xs.append(predictions[i][0])
+    ys.append(predictions[i][1])
+    ls.append(y_test[i])
+    if not test_digits_z.has_key(str(y_test[i])) and len(test_digits_z.keys()) != 10:
         test_digits_z[str(y_test[i])] = predictions[i]
-    if len(test_digits_mean.keys()) == 10:
-        break
 
 
-for k in test_digits_mean.keys():
+cmap = sns.cubehelix_palette(as_cmap=True)
+
+for k in test_digits_z.keys():
     sys.stdout.write("{}\t".format(k),)
 print("")
-for v in test_digits_mean.values():
-    sys.stdout.write("{}\t".format(v),)
-print("")
-# for v in test_digits_var.values():
-#     sys.stdout.write("{}\t".format(v),)
-# print("")
 for v in test_digits_z.values():
     sys.stdout.write("{}\t".format(v),)
+print("")
 
 
-xs = [v[0] for k, v in test_digits_z.iteritems()]
-ys = [v[1] for k, v in test_digits_z.iteritems()]
-ds = [k for k, v in test_digits_z.iteritems()]
-plt.scatter(xs, ys)
 
-for x, y, d in zip(xs, ys, ds):
-    plt.annotate(
-        d,
-        xy=(x, y), xytext=(-20, 20),
-        textcoords='offset points', ha='right', va='bottom',
-        bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-        arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+# xs = [v[0] for k, v in test_digits_z.iteritems()]
+# ys = [v[1] for k, v in test_digits_z.iteritems()]
+# ds = [k for k, v in test_digits_z.iteritems()]
+plt.scatter(xs, ys, c=ls, cmap=cmap)
+
+# for x, y, d in zip(xs, ys, ds):
+#     plt.annotate(
+#         d,
+#         xy=(x, y), xytext=(-20, 20),
+#         textcoords='offset points', ha='right', va='bottom',
+#         bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+#         arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 plt.savefig("//home//hag007//ex4py//f_c.png")
 
 
