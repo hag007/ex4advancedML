@@ -23,7 +23,7 @@ batch_size = 1000
 original_dim = 784
 latent_dim = 2
 intermediate_dim = 256
-epochs = 5
+epochs = 50
 epsilon_std = 1.0
 
 
@@ -111,8 +111,4 @@ for x, y, d in zip(xs, ys, ds):
         textcoords='offset points', ha='right', va='bottom',
         bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
         arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-plt.savefig("//home//hag007//ex4py//c.png")
-
-
-
-
+plt.savefig("c.png")
