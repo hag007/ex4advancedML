@@ -167,6 +167,7 @@ x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
 x = MaxPooling2D((2, 2), padding='same')(x)
 # shape info needed to build decoder model
 shape = K.int_shape(x)
+
 # generate latent vector Q(z|X)
 x = Flatten()(x)
 x = Dense(intermediate_dim, activation='relu')(x)
@@ -190,7 +191,7 @@ vae = Model(inputs, outputs, name='vae')
 ###########################################################
 
 # Compute VAE loss
-xent_loss = original_dim * metrics.binary_crossentropy(inputs,outputs)
+xent_loss = original_dim * metrics.binary_crossentropy(K.flatten(inputs),K.flatten(outputs))
 kl_loss = - 0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
 vae_loss = K.mean(xent_loss + kl_loss)
 
@@ -208,6 +209,8 @@ x_train = x_train.reshape((len(x_train), input_shape[0],input_shape[1],input_sha
 
 x_test = x_test.reshape((len(x_test),input_shape[0],input_shape[1],input_shape[2]))
 
+print(x_train.shape)
+
 vae.fit(x_train,
         shuffle=True,
         epochs=epochs,
@@ -218,7 +221,7 @@ print("#####")
 
 test_digits_z = {}
 
-encoder = Model(inputs, outputs, name='encoder')
+encoder = Model(inputs, z, name='encoder')
 
 predictions = encoder.predict(x_test)
 
@@ -235,8 +238,6 @@ print("")
 for v in test_digits_z.values():
     sys.stdout.write("{}\t".format(v),)
 print("")
-
-
 
 xs = [v[0] for k, v in test_digits_z.iteritems()]
 ys = [v[1] for k, v in test_digits_z.iteritems()]
