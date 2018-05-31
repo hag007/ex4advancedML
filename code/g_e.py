@@ -16,6 +16,9 @@ from keras import backend as K
 from keras import metrics
 from keras.datasets import mnist
 from keras.utils import plot_model
+import math
+import random
+
 
 batch_size = 1000
 original_dim = 784
@@ -51,14 +54,23 @@ z_log_var = Dense(latent_dim, name='z_log_var')(x)
 # use reparameterization trick to push the sampling out as input
 z = Lambda(sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])
 
-x = Dense(intermediate_dim, activation='relu')(z)
-x = Dense(shape[1] * shape[2] * shape[3], activation='relu')(x)
-x = Reshape((shape[1], shape[2], shape[3]))(x)
-x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-x = UpSampling2D((2, 2))(x)
-x = Conv2D(16, (3, 3), activation='relu', padding='same')(x)
-x = UpSampling2D((2, 2))(x)
-outputs = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
+
+dense_1 = Dense(intermediate_dim, activation='relu')
+_dense_1 = dense_1(z)
+dense_2 = Dense(shape[1] * shape[2] * shape[3], activation='relu')
+_dense_2 = dense_2(_dense_1)
+reshape_1 = Reshape((shape[1], shape[2], shape[3]))
+_reshape_1 = reshape_1(_dense_2)
+conv_1 = Conv2D(8, (3, 3), activation='relu', padding='same')
+_conv_1 = conv_1(_reshape_1)
+up_1 = UpSampling2D((2, 2))
+_up_1 = up_1(_conv_1)
+conv_2 = Conv2D(16, (3, 3), activation='relu', padding='same')
+_conv_2 = conv_2(_up_1)
+up_2 = UpSampling2D((2, 2))
+_up_2 = up_2(_conv_2)
+out = Conv2D(1, (3, 3), activation='sigmoid', padding='same')
+outputs = out(_up_2)
 
 vae = Model(inputs, outputs, name='vae')
 
@@ -89,38 +101,44 @@ vae.fit(x_train,
         batch_size=batch_size,
         validation_data=(x_test, None))
 
-print("#####")
+decoder_input = Input(shape=(latent_dim,))
+_dense_1_decoded = dense_1(decoder_input)
+_dense_2_decoded = dense_2(_dense_1_decoded)
+_reshape_1_decoded = reshape_1(_dense_2_decoded)
+_conv_1_decoded = conv_1(_reshape_1_decoded)
+_up_1_decoded = up_1(_conv_1_decoded)
+_conv_2_decoded = conv_2(_up_1_decoded)
+_up_2_decoded = up_2(_conv_2_decoded)
+_out_decoded = out(_up_2_decoded)
 
-test_digits_z = {}
-
-encoder = Model(inputs, z, name='encoder')
+generator = Model(inputs=decoder_input, outputs= _out_decoded)
+encoder = Model(inputs, [z_mean, z_log_var, z], name='encoder')
 
 predictions = encoder.predict(x_test)
-
-for i in range(len(y_test)):
-    if not test_digits_z.has_key(str(y_test[i])):
-        test_digits_z[str(y_test[i])] = predictions[i]
-    if len(test_digits_z.keys()) == 10:
+while True:
+    r1 = int(math.floor(random.random() *len(y_test)))
+    r2 = int(math.floor(random.random() *len(y_test)))
+    if y_test[r1] != y_test[r2]:
+        p1 = predictions[2][r1]
+        p2 = predictions[2][r2]
+        print("chosen numbers are: {} {}".format(y_test[r1],y_test[r2]))
+        f=open("../g_e_digits", 'w+')
+        f.write("chosen digits are: {} {}".format(y_test[r1],y_test[r2]))
+        f.close()
         break
 
+zs = []
+for i in range(10):
+    zs.append([min(p1[0], p2[0])+(random.random() * abs(p1[0] - p2[0])),
+    min(p1[1], p2[1])+random.random() * abs(p1[1] - p2[1])])
+print(zs)
 
-for k in test_digits_z.keys():
-    sys.stdout.write("{}\t".format(k),)
-print("")
-for v in test_digits_z.values():
-    sys.stdout.write("{}\t".format(v),)
-print("")
+z_sample = np.array(zs)
+x_decoded = generator.predict(z_sample)
+print(x_decoded)
 
-xs = [v[0] for k, v in test_digits_z.iteritems()]
-ys = [v[1] for k, v in test_digits_z.iteritems()]
-ds = [k for k, v in test_digits_z.iteritems()]
-plt.scatter(xs, ys)
-
-for x, y, d in zip(xs, ys, ds):
-    plt.annotate(
-        d,
-        xy=(x, y), xytext=(-20, 20),
-        textcoords='offset points', ha='right', va='bottom',
-        bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-        arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-plt.savefig("../g_c.png")
+# display reconstruction
+for i, cur in enumerate(x_decoded):
+    plt.imshow(cur.reshape(28, 28))
+    plt.gray()
+    plt.savefig("../g_e_{}.png".format(i))
