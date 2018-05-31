@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 import sys
+import seaborn as sns
 from keras.layers import Input, Dense, Lambda
 from keras.models import Model
 from keras import backend as K
@@ -19,7 +20,7 @@ from keras import metrics
 from keras.datasets import mnist
 from keras.utils import plot_model
 
-batch_size = 1000
+batch_size = 100
 original_dim = 784
 latent_dim = 2
 intermediate_dim = 256
@@ -68,47 +69,61 @@ x_test = x_test.astype('float32') / 255.
 x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
 x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
 
-vae.fit(x_train,
-        shuffle=True,
-        epochs=epochs,
-        batch_size=batch_size,
-        validation_data=(x_test, None))
-
-print("#####")
-
-test_digits_z = {}
-
 encoder = Model(x, z, name='encoder')
 
+for j in range(1,batch_size+1):
+    vae.fit(x_train,
+            shuffle=True,
+            epochs=j,
+            batch_size=batch_size,
+            validation_data=(x_test, None))
 
-predictions = encoder.predict(x_test)
+    print("#####")
 
-for i in range(len(y_test)):
-    if not test_digits_z.has_key(str(y_test[i])):
-        test_digits_z[str(y_test[i])] = predictions[i]
-    if len(test_digits_z.keys()) == 10:
-        break
-
-
-for k in test_digits_z.keys():
-    sys.stdout.write("{}\t".format(k),)
-print("")
-for v in test_digits_z.values():
-    sys.stdout.write("{}\t".format(v),)
-print("")
+    test_digits_z = {}
 
 
 
-xs = [v[0] for k, v in test_digits_z.iteritems()]
-ys = [v[1] for k, v in test_digits_z.iteritems()]
-ds = [k for k, v in test_digits_z.iteritems()]
-plt.scatter(xs, ys)
 
-for x, y, d in zip(xs, ys, ds):
-    plt.annotate(
-        d,
-        xy=(x, y), xytext=(-20, 20),
-        textcoords='offset points', ha='right', va='bottom',
-        bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-        arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-plt.savefig("c.png")
+    predictions = encoder.predict(x_test)
+
+    xs = []
+    ys = []
+    ls = []
+    for i in range(len(y_test)):
+        xs.append(predictions[i][0])
+        ys.append(predictions[i][1])
+        ls.append(y_test[i])
+        if not test_digits_z.has_key(str(y_test[i])) and len(test_digits_z.keys()) != 10:
+            test_digits_z[str(y_test[i])] = predictions[i]
+
+
+    cmap = sns.cubehelix_palette(as_cmap=True)
+
+    for k in test_digits_z.keys():
+        sys.stdout.write("{}\t".format(k),)
+    print("")
+    for v in test_digits_z.values():
+        sys.stdout.write("{}\t".format(v),)
+    print("")
+
+
+
+    # xs = [v[0] for k, v in test_digits_z.iteritems()]
+    # ys = [v[1] for k, v in test_digits_z.iteritems()]
+    # ds = [k for k, v in test_digits_z.iteritems()]
+    points = plt.scatter(xs, ys, c=ls, cmap=cmap)
+    cb = plt.colorbar(points)
+
+    # for x, y, d in zip(xs, ys, ds):
+    #     plt.annotate(
+    #         d,
+    #         xy=(x, y), xytext=(-20, 20),
+    #         textcoords='offset points', ha='right', va='bottom',
+    #         bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+    #         arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+    plt.savefig("//home//hag007//ex4py//c_{}.png".format(j))
+    plt.cla()
+    cb.remove() 
+
+
