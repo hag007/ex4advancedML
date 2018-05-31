@@ -122,8 +122,6 @@ for j in range(1,batch_size+1):
     #         textcoords='offset points', ha='right', va='bottom',
     #         bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
     #         arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-    plt.savefig("//home//hag007//ex4py//c_{}.png".format(j))
+    plt.savefig("../c_{}.png".format(j))
     plt.cla()
-    cb.remove() 
-
-
+    cb.remove()
