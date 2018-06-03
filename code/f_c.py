@@ -7,12 +7,12 @@
 '''
 from __future__ import print_function
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 import sys
-import seaborn as sns
 from keras.layers import Input, Dense, Lambda
 from keras.models import Model
 from keras import backend as K
@@ -98,9 +98,6 @@ for i in range(len(y_test)):
     if not test_digits_z.has_key(str(y_test[i])) and len(test_digits_z.keys()) != 10:
         test_digits_z[str(y_test[i])] = predictions[i]
 
-
-cmap = sns.cubehelix_palette(as_cmap=True)
-
 for k in test_digits_z.keys():
     sys.stdout.write("{}\t".format(k),)
 print("")
@@ -113,7 +110,7 @@ print("")
 # xs = [v[0] for k, v in test_digits_z.iteritems()]
 # ys = [v[1] for k, v in test_digits_z.iteritems()]
 # ds = [k for k, v in test_digits_z.iteritems()]
-plt.scatter(xs, ys, c=ls, cmap=cmap)
+plt.scatter(xs, ys, c=ls, cmap="gist_rainbow")
 
 # for x, y, d in zip(xs, ys, ds):
 #     plt.annotate(
@@ -122,7 +119,9 @@ plt.scatter(xs, ys, c=ls, cmap=cmap)
 #         textcoords='offset points', ha='right', va='bottom',
 #         bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
 #         arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-plt.savefig("//home//hag007//ex4py//f_c.png")
+if not os.path.exists("output"):
+    os.mkdir("output")
+plt.savefig("output/f_c.png")
 
 
 

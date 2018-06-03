@@ -18,13 +18,13 @@ from keras.datasets import mnist
 from keras.utils import plot_model
 import math
 import random
+import os
 
-
-batch_size = 1000
+batch_size = 100
 original_dim = 784
 latent_dim = 2
 intermediate_dim = 16
-epochs = 50
+epochs = 1
 epsilon_std = 1.0
 
 def sampling(args):
@@ -135,10 +135,11 @@ print(zs)
 
 z_sample = np.array(zs)
 x_decoded = generator.predict(z_sample)
-print(x_decoded)
 
 # display reconstruction
 for i, cur in enumerate(x_decoded):
     plt.imshow(cur.reshape(28, 28))
     plt.gray()
-    plt.savefig("../g_e_{}.png".format(i))
+    if not os.path.exists("output"):
+        os.mkdir("output")
+    plt.savefig("output/g_e_{}.png".format(i))

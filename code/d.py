@@ -16,7 +16,7 @@ from keras.models import Model
 from keras import backend as K
 from keras import metrics
 from keras.datasets import mnist
-
+import os
 batch_size = 100
 original_dim = 784
 latent_dim = 2
@@ -89,4 +89,6 @@ print(x_decoded)
 # display reconstruction
 plt.imshow(x_decoded.reshape(28, 28))
 plt.gray()
-plt.savefig("//home//hag007//ex4py//d.png")
+if not os.path.exists("output"):
+    os.mkdir("output")
+plt.savefig("output/d.png")

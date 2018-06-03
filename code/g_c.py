@@ -8,7 +8,7 @@ from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
-
+import os
 import sys
 from keras.layers import Input, Dense, Lambda, Conv2D, MaxPooling2D, Flatten, Reshape, UpSampling2D
 from keras.models import Model
@@ -16,13 +16,15 @@ from keras import backend as K
 from keras import metrics
 from keras.datasets import mnist
 from keras.utils import plot_model
+import seaborn as sns
 
-batch_size = 1000
+batch_size = 100
 original_dim = 784
 latent_dim = 2
 intermediate_dim = 16
-epochs = 50
+epochs = 1
 epsilon_std = 1.0
+
 
 def sampling(args):
     z_mean, z_log_var = args
@@ -97,12 +99,15 @@ encoder = Model(inputs, z, name='encoder')
 
 predictions = encoder.predict(x_test)
 
+xs = []
+ys = []
+ls = []
 for i in range(len(y_test)):
-    if not test_digits_z.has_key(str(y_test[i])):
+    xs.append(predictions[i][0])
+    ys.append(predictions[i][1])
+    ls.append(y_test[i])
+    if not test_digits_z.has_key(str(y_test[i])) and len(test_digits_z.keys()) != 10:
         test_digits_z[str(y_test[i])] = predictions[i]
-    if len(test_digits_z.keys()) == 10:
-        break
-
 
 for k in test_digits_z.keys():
     sys.stdout.write("{}\t".format(k),)
@@ -111,16 +116,23 @@ for v in test_digits_z.values():
     sys.stdout.write("{}\t".format(v),)
 print("")
 
-xs = [v[0] for k, v in test_digits_z.iteritems()]
-ys = [v[1] for k, v in test_digits_z.iteritems()]
-ds = [k for k, v in test_digits_z.iteritems()]
-plt.scatter(xs, ys)
 
-for x, y, d in zip(xs, ys, ds):
-    plt.annotate(
-        d,
-        xy=(x, y), xytext=(-20, 20),
-        textcoords='offset points', ha='right', va='bottom',
-        bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-        arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-plt.savefig("../g_c.png")
+
+# xs = [v[0] for k, v in test_digits_z.iteritems()]
+# ys = [v[1] for k, v in test_digits_z.iteritems()]
+# ds = [k for k, v in test_digits_z.iteritems()]
+points = plt.scatter(xs, ys, c=ls, cmap="gist_rainbow")
+cb = plt.colorbar(points)
+
+# for x, y, d in zip(xs, ys, ds):
+#     plt.annotate(
+#         d,
+#         xy=(x, y), xytext=(-20, 20),
+#         textcoords='offset points', ha='right', va='bottom',
+#         bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+#         arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+if not os.path.exists("output"):
+    os.mkdir("output")
+plt.savefig("output/g_c.png")
+plt.cla()
+cb.remove()

@@ -18,6 +18,7 @@ from keras import metrics
 from keras.datasets import mnist
 import math
 import random
+import os
 batch_size = 100
 original_dim = 784
 latent_dim = 2
@@ -119,4 +120,6 @@ print(x_decoded)
 for i, cur in enumerate(x_decoded):
     plt.imshow(cur.reshape(28, 28))
     plt.gray()
-    plt.savefig("//home//hag007//ex4py//f_e_{}.png".format(i))
+    if not os.path.exists("output"):
+        os.mkdir("output")
+    plt.savefig("output/f_e_{}.png".format(i))

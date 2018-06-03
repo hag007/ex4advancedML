@@ -1,3 +1,4 @@
+
 '''This script demonstrates how to build a variational autoencoder with Keras.
 
  #Reference
@@ -6,13 +7,12 @@
    https://arxiv.org/abs/1312.6114
 '''
 from __future__ import print_function
-
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 import sys
-import seaborn as sns
 from keras.layers import Input, Dense, Lambda
 from keras.models import Model
 from keras import backend as K
@@ -24,7 +24,7 @@ batch_size = 100
 original_dim = 784
 latent_dim = 2
 intermediate_dim = 256
-epochs = 50
+epochs = 1
 epsilon_std = 1.0
 
 
@@ -97,7 +97,7 @@ for i in range(len(y_test)):
         test_digits_z[str(y_test[i])] = predictions[i]
 
 
-cmap = sns.cubehelix_palette(as_cmap=True)
+# cmap = sns.cubehelix_palette(as_cmap=True)
 
 for k in test_digits_z.keys():
     sys.stdout.write("{}\t".format(k),)
@@ -111,7 +111,7 @@ print("")
 # xs = [v[0] for k, v in test_digits_z.iteritems()]
 # ys = [v[1] for k, v in test_digits_z.iteritems()]
 # ds = [k for k, v in test_digits_z.iteritems()]
-points = plt.scatter(xs, ys, c=ls, cmap=cmap)
+points = plt.scatter(xs, ys, c=ls, cmap='gist_rainbow')
 cb = plt.colorbar(points)
 
 # for x, y, d in zip(xs, ys, ds):
@@ -121,7 +121,9 @@ cb = plt.colorbar(points)
 #         textcoords='offset points', ha='right', va='bottom',
 #         bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
 #         arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-plt.savefig("//home//hag007//ex4py//c.png")
+if not os.path.exists("output"):
+    os.mkdir("output")
+plt.savefig("output/c.png")
 plt.cla()
 cb.remove()
 
