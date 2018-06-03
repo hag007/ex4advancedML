@@ -9,6 +9,8 @@
 from __future__ import print_function
 import os
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
@@ -19,6 +21,7 @@ from keras import backend as K
 from keras import metrics
 from keras.datasets import mnist
 from keras.utils import plot_model
+
 
 batch_size = 100
 original_dim = 784

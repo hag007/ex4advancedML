@@ -4,7 +4,8 @@
    https://arxiv.org/abs/1312.6114
 '''
 from __future__ import print_function
-
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
